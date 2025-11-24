@@ -537,32 +537,49 @@ for date in sorted(unique_dates_to_plot):
     plt.close(fig)
 
 
-# --- Numeric totals for plots (independent of summary_df text table) ---
+st.subheader("📊 Summary Visualizations")
 
-total_kwh_peak_numeric = daily_summary_df['plotted_kwh_peak'].sum()
-total_kwh_offpeak_numeric = daily_summary_df['plotted_kwh_off_peak'].sum()
+# --- Split the summary into kWh and cost groups ---
+kwh_df = summary_df[summary_df['Metric'].str.contains("kWh")].copy()
+cost_df = summary_df[summary_df['Metric'].str.contains("Cost")].copy()
 
-total_cost_peak_numeric = total_kwh_peak_numeric * WEEKDAY_PEAK_RATE_DEFAULT
-total_cost_offpeak_numeric = total_kwh_offpeak_numeric * WEEKDAY_OFFPEAK_RATE_DEFAULT
+# Convert "40.19 kWh" → 40.19
+kwh_df["Numeric"] = kwh_df["Value"].str.replace(" kWh", "", regex=False).astype(float)
 
-# --- Total Cost Pie Chart ---
-fig, ax = plt.subplots(figsize=(6, 6))
-labels = ['Peak Cost', 'Off-Peak Cost']
-sizes = [total_cost_peak_numeric, total_cost_offpeak_numeric]
+# Convert "₪ 17.92" → 17.92
+cost_df["Numeric"] = cost_df["Value"].str.replace("₪ ", "", regex=False).astype(float)
 
-ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
-ax.set_title("Total Cost Breakdown (Peak vs Off-Peak)")
-st.pyplot(fig)
+# --- ENERGY BREAKDOWN CHART ---
+st.markdown("### ⚡ Energy Breakdown (kWh)")
 
-fig2, ax2 = plt.subplots(figsize=(6, 6))
-labels2 = ['Peak kWh', 'Off-Peak kWh']
-sizes2 = [total_kwh_peak_numeric, total_kwh_offpeak_numeric]
+fig1, ax1 = plt.subplots(figsize=(6, 4))
+ax1.bar(kwh_df["Metric"], kwh_df["Numeric"])
+ax1.set_ylabel("kWh")
+ax1.set_title("Energy Breakdown")
 
-ax2.bar(labels2, sizes2)
-ax2.set_ylabel("kWh")
-ax2.set_title("Energy Consumption Breakdown (Peak vs Off-Peak)")
+# Add labels
+for i, v in enumerate(kwh_df["Numeric"]):
+    ax1.text(i, v + 0.01, f"{v:.2f}", ha='center')
+
+ax1.tick_params(axis='x', rotation=45)
+
+st.pyplot(fig1)
+
+# --- COST BREAKDOWN CHART ---
+st.markdown("### 💰 Cost Breakdown (₪)")
+
+fig2, ax2 = plt.subplots(figsize=(6, 4))
+ax2.bar(cost_df["Metric"], cost_df["Numeric"])
+ax2.set_ylabel("₪")
+ax2.set_title("Cost Breakdown")
+
+# Add labels
+for i, v in enumerate(cost_df["Numeric"]):
+    ax2.text(i, v + 0.01, f"₪ {v:.2f}", ha='center')
+
+ax2.tick_params(axis='x', rotation=45)
+
 st.pyplot(fig2)
-
 
 
 # print("Hourly plots generated for each day in the filtered range.") # Commented out logging print
