@@ -18,10 +18,10 @@ if password != "1112":
 START_DATE = '2025-11-01'
 END_DATE = '2025-11-30'
 
-RATE_WD_PEAK = 0.4977
-RATE_WD_OFF_PEAK = 0.446
-RATE_WH_PEAK = 0.4977
-RATE_WH_OFF_PEAK = 0.446
+WEEKDAY_PEAK_RATE_DEFAULT = 0.4977
+WEEKDAY_OFFPEAK_RATE_DEFAULT = 0.446
+WEEKEND_PEAK_RATE_DEFAULT = 0.4977
+WEEKEND_OFFPEAK_RATE_DEFAULT = 0.446
 WEEKEND_HAS_PEAK_RATE = False # Explicitly set as False
 CHECK_MISSINIG_HOURS = True
 
@@ -185,7 +185,7 @@ base_query_parts.append(f"""
              T1.date_local NOT IN (SELECT holiday_date FROM holidays)
         THEN T1.kwh_17_22
         ELSE 0
-    END) * {RATE_WD_PEAK} AS cost_weekday_17_22,
+    END) * {WEEKDAY_PEAK_RATE_DEFAULT} AS cost_weekday_17_22,
 
 
     SUM(CASE
@@ -200,7 +200,7 @@ base_query_parts.append(f"""
              T1.date_local NOT IN (SELECT holiday_date FROM holidays)
         THEN T1.kwh_22_17
         ELSE 0
-    END) * {RATE_WD_OFF_PEAK} AS cost_weekday_22_17
+    END) * {WEEKDAY_OFFPEAK_RATE_DEFAULT} AS cost_weekday_22_17
 """)
 cost_columns_to_sum.extend(['cost_weekday_17_22', 'cost_weekday_22_17'])
 
@@ -219,7 +219,7 @@ if WEEKEND_HAS_PEAK_RATE:
              T1.date_local IN (SELECT holiday_date FROM holidays)
         THEN T1.kwh_17_22
         ELSE 0
-    END) * {RATE_WH_PEAK} AS cost_weekend_holiday_17_22,
+    END) * {WEEKEND_PEAK_RATE_DEFAULT} AS cost_weekend_holiday_17_22,
 
 
     SUM(CASE
@@ -234,7 +234,7 @@ if WEEKEND_HAS_PEAK_RATE:
              T1.date_local IN (SELECT holiday_date FROM holidays)
         THEN T1.kwh_22_17
         ELSE 0
-    END) * {RATE_WH_OFF_PEAK} AS cost_weekend_holiday_22_17
+    END) * {WEEKEND_OFFPEAK_RATE_DEFAULT} AS cost_weekend_holiday_22_17
 """)
     cost_columns_to_sum.extend(['cost_weekend_holiday_17_22', 'cost_weekend_holiday_22_17'])
 else:
@@ -251,7 +251,7 @@ else:
              T1.date_local IN (SELECT holiday_date FROM holidays)
         THEN T1.kwh_17_22 + T1.kwh_22_17
         ELSE 0
-    END) * {RATE_WH_OFF_PEAK} AS cost_weekend_holiday_off_peak
+    END) * {WEEKEND_OFFPEAK_RATE_DEFAULT} AS cost_weekend_holiday_off_peak
 """)
     cost_columns_to_sum.append('cost_weekend_holiday_off_peak')
 
@@ -336,8 +336,47 @@ END_DATE = st.sidebar.date_input(
     daily_summary_df['date_local'].max(),
     key="end_date_input"
 )
+
+st.sidebar.markdown("### ⚡ Electricity Rates")
+
+WEEKDAY_PEAK_RATE = st.sidebar.number_input(
+    "Weekday Peak Rate ($/kWh)",
+    min_value=0.0,
+    max_value=5.0,
+    value=WEEKDAY_PEAK_RATE_DEFAULT,
+    step=0.001,
+    key="weekday_peak_rate"
+)
+
+WEEKDAY_OFFPEAK_RATE = st.sidebar.number_input(
+    "Weekday Off-Peak Rate ($/kWh)",
+    min_value=0.0,
+    max_value=5.0,
+    value=WEEKDAY_OFFPEAK_RATE_DEFAULT,
+    step=0.001,
+    key="weekday_offpeak_rate"
+)
+
+WEEKEND_PEAK_RATE = st.sidebar.number_input(
+    "Weekend Peak Rate ($/kWh)",
+    min_value=0.0,
+    max_value=5.0,
+    value=WEEKEND_PEAK_RATE_DEFAULT,
+    step=0.001,
+    key="weekend_peak_rate"
+)
+
+WEEKEND_OFFPEAK_RATE = st.sidebar.number_input(
+    "Weekend Off-Peak Rate ($/kWh)",
+    min_value=0.0,
+    max_value=5.0,
+    value=WEEKEND_OFFPEAK_RATE_DEFAULT,
+    step=0.001,
+    key="weekend_offpeak_rate"
+)
+
 WEEKEND_HAS_PEAK_RATE = st.sidebar.checkbox(
-    "Weekend has peak rate?", 
+    "Weekend has peak rate", 
     value=False,
     key="weekend_peak_checkbox"
 )
