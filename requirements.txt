@@ -1,2 +1,7 @@
 streamlit
+gspread
+google-auth
+pandas
+holidays
 matplotlib
+seaborn
