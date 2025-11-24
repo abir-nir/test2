@@ -48,7 +48,7 @@ creds = Credentials.from_service_account_info(
     st.secrets["gcp"],
     scopes=scope
 )
-)
+
 gc = gspread.authorize(creds)
 
 # --- 1. Load data from Google Sheet and Initial Processing ---
