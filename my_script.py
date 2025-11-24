@@ -330,8 +330,8 @@ print("\n--- Aggregated Consumption and Cost Summary ---")
 print(summary_df)
 
 # Convert date columns
-df['date_local'] = pd.to_datetime(df['date_local'])
-df['delta_kwh'] = pd.to_numeric(df['delta_kwh'])
+df['date_local'] = pd.to_datetime(daily_summary_df['date_local'])
+df['delta_kwh'] = pd.to_numeric(daily_summary_df['delta_kwh'])
 
 # --- Sidebar filters ---
 START_DATE = st.sidebar.date_input("Start Date", df['date_local'].min())
