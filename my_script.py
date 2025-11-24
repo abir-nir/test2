@@ -537,51 +537,6 @@ for date in sorted(unique_dates_to_plot):
     plt.close(fig)
 
 
-st.subheader("📊 Summary Visualizations")
-
-# --- Split the summary into kWh and cost groups ---
-kwh_df = summary_df[summary_df['Metric'].str.contains("kWh")].copy()
-cost_df = summary_df[summary_df['Metric'].str.contains("Cost")].copy()
-
-# Convert "40.19 kWh" → 40.19
-kwh_df["Numeric"] = kwh_df["Value"].str.replace(" kWh", "", regex=False).astype(float)
-
-# Convert "₪ 17.92" → 17.92
-cost_df["Numeric"] = cost_df["Value"].str.replace("₪ ", "", regex=False).astype(float)
-
-# --- ENERGY BREAKDOWN CHART ---
-st.markdown("### ⚡ Energy Breakdown (kWh)")
-
-fig1, ax1 = plt.subplots(figsize=(6, 4))
-ax1.bar(kwh_df["Metric"], kwh_df["Numeric"])
-ax1.set_ylabel("kWh")
-ax1.set_title("Energy Breakdown")
-
-# Add labels
-for i, v in enumerate(kwh_df["Numeric"]):
-    ax1.text(i, v + 0.01, f"{v:.2f}", ha='center')
-
-ax1.tick_params(axis='x', rotation=45)
-
-st.pyplot(fig1)
-
-# --- COST BREAKDOWN CHART ---
-st.markdown("### 💰 Cost Breakdown (₪)")
-
-fig2, ax2 = plt.subplots(figsize=(6, 4))
-ax2.bar(cost_df["Metric"], cost_df["Numeric"])
-ax2.set_ylabel("₪")
-ax2.set_title("Cost Breakdown")
-
-# Add labels
-for i, v in enumerate(cost_df["Numeric"]):
-    ax2.text(i, v + 0.01, f"₪ {v:.2f}", ha='center')
-
-ax2.tick_params(axis='x', rotation=45)
-
-st.pyplot(fig2)
-
-
 # print("Hourly plots generated for each day in the filtered range.") # Commented out logging print
 
 # Close the initial connection
