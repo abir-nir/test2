@@ -412,17 +412,18 @@ hourly_df_plot['hour_local'] = pd.to_numeric(hourly_df_plot['hour_local'], error
 # Ensure 'date_local' is datetime in hourly_df_plot
 hourly_df_plot['date_local'] = pd.to_datetime(hourly_df_plot['date_local'], errors='coerce')
 hourly_df_plot['hour_local'] = pd.to_numeric(hourly_df_plot['hour_local'], errors='coerce')
-holidays_series = holidays.CountryHoliday('US', years=hourly_df_plot['date_local'].dt.year.unique())  # adjust country
+# Ensure hourly_df_plot['date_local'] is datetime
+hourly_df_plot['date_local'] = pd.to_datetime(hourly_df_plot['date_local'])
 
+# Normalize holiday dates once
+holidays_normalized = holidays_series.dt.normalize()  # this is safe
 
-unique_dates_to_plot = hourly_df_plot['date_local'].dt.normalize().unique()
 for date in sorted(unique_dates_to_plot):
-    date_str = date.strftime('%Y-%m-%d')
-    daily_hourly_data = hourly_df_plot[hourly_df_plot['date_local'].dt.normalize() == date].copy()
-    daily_hourly_data = daily_hourly_data.sort_values(by='hour_local')
-
+    date_normalized = pd.to_datetime(date).normalize()
     is_current_day_weekend = (date.weekday() >= 5)
-    is_current_day_holiday = date.normalize() in holidays_series.dt.normalize().values
+    is_current_day_holiday = date_normalized in holidays_normalized.values
+    is_current_day_weekend_or_holiday = is_current_day_weekend or is_current_day_holiday
+
     is_current_day_weekend_or_holiday = is_current_day_weekend or is_current_day_holiday
 
     if is_current_day_weekend_or_holiday and not WEEKEND_HAS_PEAK_RATE:
