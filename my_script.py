@@ -327,7 +327,7 @@ summary_data = {
 summary_df = pd.DataFrame(summary_data)
 
 print("\n--- Aggregated Consumption and Cost Summary ---")
-display(summary_df)
+print(summary_df)
 
 plt.figure(figsize=(12, 6))
 x_pos = range(len(daily_summary_df))
