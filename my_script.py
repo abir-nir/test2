@@ -384,11 +384,6 @@ plt.savefig(f'{folder_daily}/daily_energy_consumption.png')
 st.pyplot(fig)
 plt.close(fig)
 
-# --- Hourly Plots ---
-# Ensure 'date_local' is datetime in hourly_df_plot
-hourly_df_plot['date_local'] = pd.to_datetime(hourly_df_plot['date_local'], errors='coerce')
-hourly_df_plot['hour_local'] = pd.to_numeric(hourly_df_plot['hour_local'], errors='coerce')
-holidays_series = holidays.CountryHoliday('US', years=hourly_df_plot['date_local'].dt.year.unique())  # adjust country
 
 # --- Load hourly data and prepare hourly_df_plot ---
 with sqlite3.connect("energy_data.db") as conn_hourly:
@@ -412,6 +407,12 @@ else:
 
 # Ensure numeric for hour_local
 hourly_df_plot['hour_local'] = pd.to_numeric(hourly_df_plot['hour_local'], errors='coerce')
+
+# --- Hourly Plots ---
+# Ensure 'date_local' is datetime in hourly_df_plot
+hourly_df_plot['date_local'] = pd.to_datetime(hourly_df_plot['date_local'], errors='coerce')
+hourly_df_plot['hour_local'] = pd.to_numeric(hourly_df_plot['hour_local'], errors='coerce')
+holidays_series = holidays.CountryHoliday('US', years=hourly_df_plot['date_local'].dt.year.unique())  # adjust country
 
 
 unique_dates_to_plot = hourly_df_plot['date_local'].dt.normalize().unique()
