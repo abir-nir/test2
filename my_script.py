@@ -536,35 +536,54 @@ for date in sorted(unique_dates_to_plot):
     st.pyplot(fig)
     plt.close(fig)
 
-st.subheader("📊 Summary Visualizations")
+# --- Filter Daily Summary Based on Sidebar ---
+filtered_daily = daily_summary_df[
+    (daily_summary_df['date_local'] >= pd.to_datetime(START_DATE)) &
+    (daily_summary_df['date_local'] <= pd.to_datetime(END_DATE))
+].copy()
 
-# --- Energy Breakdown Chart (kWh) ---
-energy_labels = ["Peak kWh", "Off-Peak kWh", "Total kWh"]
-energy_values = [total_peak_kwh, total_off_peak_kwh, total_kwh_overall]
+# --- Apply Weekend/Holiday Logic ---
+is_weekend = (filtered_daily['date_local'].dt.weekday >= 5)
+is_holiday = filtered_daily['date_local'].dt.date.isin(holidays_series.dt.date)
+is_weekend_or_holiday = is_weekend | is_holiday
 
-fig1, ax1 = plt.subplots(figsize=(6, 4))
-ax1.bar(energy_labels, energy_values)
-ax1.set_ylabel("kWh")
-ax1.set_title("Energy Breakdown (kWh)")
+filtered_daily['plotted_kwh_peak'] = filtered_daily['kwh_17_22']
+filtered_daily['plotted_kwh_off_peak'] = filtered_daily['kwh_22_17']
 
-for i, v in enumerate(energy_values):
-    ax1.text(i, v + max(energy_values) * 0.01, f"{v:.2f}", ha="center")
-plt.tight_layout(pad=2.0)
-st.pyplot(fig1)
+if not WEEKEND_HAS_PEAK_RATE:
+    filtered_daily.loc[is_weekend_or_holiday, 'plotted_kwh_off_peak'] += filtered_daily.loc[is_weekend_or_holiday, 'plotted_kwh_peak']
+    filtered_daily.loc[is_weekend_or_holiday, 'plotted_kwh_peak'] = 0
 
-# --- Cost Breakdown Chart (₪) ---
-cost_labels = ["Peak Cost (₪)", "Off-Peak Cost (₪)", "Total Cost (₪)"]
-cost_values = [cost_total_peak_kwh, cost_total_off_peak_kwh, total_cost]
+# --- Recalculate Totals ---
+total_kwh_overall = filtered_daily['total_kwh'].sum()
+total_peak_kwh = filtered_daily['plotted_kwh_peak'].sum()
+total_off_peak_kwh = filtered_daily['plotted_kwh_off_peak'].sum()
 
-fig2, ax2 = plt.subplots(figsize=(6, 4))
-ax2.bar(cost_labels, cost_values)
-ax2.set_ylabel("₪")
-ax2.set_title("Cost Breakdown (₪)")
+cost_total_peak_kwh = report['cost_weekday_17_22'].sum()
+cost_total_off_peak_kwh = report['cost_weekday_22_17'].sum() + report['cost_weekend_holiday_off_peak'].sum()
+total_cost = report['Total_Cost'].sum()
 
-for i, v in enumerate(cost_values):
-    ax2.text(i, v + max(cost_values) * 0.01, f"₪ {v:.2f}", ha="center")
-plt.tight_layout(pad=2.0)
+# --- Summary Visualization ---
+fig, ax = plt.subplots(figsize=(8, 6))
+labels = ['Peak kWh', 'Off-Peak kWh']
+sizes = [total_peak_kwh, total_off_peak_kwh]
+colors = ['lightcoral', 'lightgreen']
+ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140, colors=colors)
+ax.set_title(f"Energy Consumption Breakdown\nTotal kWh: {total_kwh_overall:.2f}", fontsize=14)
+
+st.pyplot(fig)
+plt.close(fig)
+
+# --- Cost Breakdown Visualization ---
+fig2, ax2 = plt.subplots(figsize=(8, 6))
+labels_cost = ['Peak Cost', 'Off-Peak Cost']
+sizes_cost = [cost_total_peak_kwh, cost_total_off_peak_kwh]
+colors_cost = ['lightcoral', 'lightgreen']
+ax2.pie(sizes_cost, labels=labels_cost, autopct='%1.1f%%', startangle=140, colors=colors_cost)
+ax2.set_title(f"Total Cost Breakdown (NIS)\nGrand Total: ₪ {total_cost:.2f}", fontsize=14)
+
 st.pyplot(fig2)
+plt.close(fig2)
 
 # print("Hourly plots generated for each day in the filtered range.") # Commented out logging print
 
