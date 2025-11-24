@@ -25,10 +25,6 @@ RATE_WH_OFF_PEAK = 0.446
 WEEKEND_HAS_PEAK_RATE = False # Explicitly set as False
 CHECK_MISSINIG_HOURS = True
 
-
-START_YEAR = 2025
-END_YEAR = 2027
-
 jewish_holidays = [
     '2025-10-03', '2025-10-12', '2025-10-17', '2025-12-30',
     '2026-03-03', '2026-04-02', '2026-04-03', '2026-04-08', '2026-04-09', '2026-05-22', '2026-05-23', '2026-07-23', '2026-09-12', '2026-09-13', '2026-09-14', '2026-09-21', '2026-09-26', '2026-09-27', '2026-10-03', '2026-10-04',
@@ -263,7 +259,7 @@ query = f"""
 SELECT
     {','.join(base_query_parts)}
 FROM daily_summary T1
-WHERE T1.date_local BETWEEN '{START_DATE}' AND '{END_DATE}'
+WHERE T1.date_local BETWEEN '{}' AND '{END_DATE}'
 """
 
 with sqlite3.connect("energy_data.db") as conn_report:
