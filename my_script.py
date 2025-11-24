@@ -547,35 +547,35 @@ ax.set_title("Total Cost Breakdown (Peak vs Off-Peak)")
 st.pyplot(fig)
 
 
-# --- Total kWh Bar Chart ---
-fig, ax = plt.subplots(figsize=(6, 6))
-labels = ['Peak kWh', 'Off-Peak kWh']
-sizes = [summary_df['total_kwh_peak'].iloc[0], summary_df['total_kwh_off_peak'].iloc[0]]
+# # --- Total kWh Bar Chart ---
+# fig, ax = plt.subplots(figsize=(6, 6))
+# labels = ['Peak kWh', 'Off-Peak kWh']
+# sizes = [summary_df['total_kwh_peak'].iloc[0], summary_df['total_kwh_off_peak'].iloc[0]]
 
-ax.bar(labels, sizes)
-ax.set_ylabel("kWh")
-ax.set_title("Total Energy Consumption (Peak / Off-Peak)")
+# ax.bar(labels, sizes)
+# ax.set_ylabel("kWh")
+# ax.set_title("Total Energy Consumption (Peak / Off-Peak)")
 
-# Add value labels
-for i, v in enumerate(sizes):
-    ax.text(i, v + 0.2, f"{v:.2f}", ha='center')
+# # Add value labels
+# for i, v in enumerate(sizes):
+#     ax.text(i, v + 0.2, f"{v:.2f}", ha='center')
 
-st.pyplot(fig)
+# st.pyplot(fig)
 
-# --- Daily Total kWh Line Plot ---
-fig, ax = plt.subplots(figsize=(12, 5))
-ax.plot(daily_summary_df['date_local'], daily_summary_df['total_kwh'], marker='o')
+# # --- Daily Total kWh Line Plot ---
+# fig, ax = plt.subplots(figsize=(12, 5))
+# ax.plot(daily_summary_df['date_local'], daily_summary_df['total_kwh'], marker='o')
 
-ax.set_xlabel("Date")
-ax.set_ylabel("Total kWh")
-ax.set_title("Daily Total Energy Consumption")
-ax.grid(True)
+# ax.set_xlabel("Date")
+# ax.set_ylabel("Total kWh")
+# ax.set_title("Daily Total Energy Consumption")
+# ax.grid(True)
 
-# Add labels on top of points
-for x, y in zip(daily_summary_df['date_local'], daily_summary_df['total_kwh']):
-    ax.text(x, y + 0.1, f"{y:.2f}", ha='center', fontsize=8)
+# # Add labels on top of points
+# for x, y in zip(daily_summary_df['date_local'], daily_summary_df['total_kwh']):
+#     ax.text(x, y + 0.1, f"{y:.2f}", ha='center', fontsize=8)
 
-st.pyplot(fig)
+# st.pyplot(fig)
 
 
 # print("Hourly plots generated for each day in the filtered range.") # Commented out logging print
