@@ -37,9 +37,17 @@ jewish_holidays = [
 
 
 # --- 0. Google Sheets Authentication ---
+# Use the correct scopes
+scope = [
+    "https://www.googleapis.com/auth/spreadsheets",      # Full access
+    "https://www.googleapis.com/auth/drive.file",        # Access files created by the service account
+    "https://www.googleapis.com/auth/drive"              # Optional: access all Drive files
+]
+
 creds = Credentials.from_service_account_info(
     st.secrets["gcp"],
-    scopes=["https://www.googleapis.com/auth/spreadsheets"]
+    scopes=scope
+)
 )
 gc = gspread.authorize(creds)
 
