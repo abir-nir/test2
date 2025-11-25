@@ -71,67 +71,6 @@ df["received_at_local_naive"] = df["received_at_local"].dt.tz_localize(None)
 conn = sqlite3.connect("energy_data.db")
 df.to_sql("raw_data", conn, if_exists="replace", index=False)
 
-# --- Sidebar filters ---
-st.sidebar.markdown("### 📅 Date")
-
-START_DATE = st.sidebar.date_input(
-    "Start Date", 
-    daily_summary_df['date_local'].min(),
-    key="start_date_input"
-)
-END_DATE = st.sidebar.date_input(
-    "End Date", 
-    daily_summary_df['date_local'].max(),
-    key="end_date_input"
-)
-
-st.sidebar.markdown("### ⚡ Electricity Rates")
-
-WEEKDAY_PEAK_RATE = st.sidebar.number_input(
-    "Weekday Peak Rate (₪/kWh)",
-    min_value=0.0,
-    max_value=5.0,
-    value=WEEKDAY_PEAK_RATE_DEFAULT,
-    step=0.0001,
-    format="%.4f",   # 👈 prevents rounding
-    key="weekday_peak_rate"
-)
-
-WEEKDAY_OFFPEAK_RATE = st.sidebar.number_input(
-    "Weekday Off-Peak Rate (₪/kWh)",
-    min_value=0.0,
-    max_value=5.0,
-    value=WEEKDAY_OFFPEAK_RATE_DEFAULT,
-    step=0.0001,
-    format="%.4f",
-    key="weekday_offpeak_rate"
-)
-
-WEEKEND_PEAK_RATE = st.sidebar.number_input(
-    "Weekend Peak Rate (₪/kWh)",
-    min_value=0.0,
-    max_value=5.0,
-    value=WEEKEND_PEAK_RATE_DEFAULT,
-    step=0.0001,
-    format="%.4f",
-    key="weekend_peak_rate"
-)
-
-WEEKEND_OFFPEAK_RATE = st.sidebar.number_input(
-    "Weekend Off-Peak Rate (₪/kWh)",
-    min_value=0.0,
-    max_value=5.0,
-    value=WEEKEND_OFFPEAK_RATE_DEFAULT,
-    step=0.0001,
-    format="%.4f",
-    key="weekend_offpeak_rate"
-)
-
-WEEKEND_HAS_PEAK_RATE = st.sidebar.checkbox(
-    "Weekend has peak rate", 
-    value=False,
-    key="weekend_peak_checkbox"
-)
 
 # --- 3. Compute hourly deltas view ---
 conn.execute("DROP VIEW IF EXISTS hourly_deltas")
@@ -344,6 +283,71 @@ daily_summary_df['plotted_kwh_off_peak'] = daily_summary_df['kwh_22_17']
 is_weekend = (daily_summary_df['date_local'].dt.weekday == 4) | (daily_summary_df['date_local'].dt.weekday == 5)
 is_holiday = daily_summary_df['date_local'].dt.date.isin(holidays_series.dt.date)
 is_weekend_or_holiday = is_weekend | is_holiday
+
+
+# --- Sidebar filters ---
+st.sidebar.markdown("### 📅 Date")
+
+START_DATE = st.sidebar.date_input(
+    "Start Date", 
+    daily_summary_df['date_local'].min(),
+    key="start_date_input"
+)
+END_DATE = st.sidebar.date_input(
+    "End Date", 
+    daily_summary_df['date_local'].max(),
+    key="end_date_input"
+)
+
+st.sidebar.markdown("### ⚡ Electricity Rates")
+
+WEEKDAY_PEAK_RATE = st.sidebar.number_input(
+    "Weekday Peak Rate (₪/kWh)",
+    min_value=0.0,
+    max_value=5.0,
+    value=WEEKDAY_PEAK_RATE_DEFAULT,
+    step=0.0001,
+    format="%.4f",   # 👈 prevents rounding
+    key="weekday_peak_rate"
+)
+
+WEEKDAY_OFFPEAK_RATE = st.sidebar.number_input(
+    "Weekday Off-Peak Rate (₪/kWh)",
+    min_value=0.0,
+    max_value=5.0,
+    value=WEEKDAY_OFFPEAK_RATE_DEFAULT,
+    step=0.0001,
+    format="%.4f",
+    key="weekday_offpeak_rate"
+)
+
+WEEKEND_PEAK_RATE = st.sidebar.number_input(
+    "Weekend Peak Rate (₪/kWh)",
+    min_value=0.0,
+    max_value=5.0,
+    value=WEEKEND_PEAK_RATE_DEFAULT,
+    step=0.0001,
+    format="%.4f",
+    key="weekend_peak_rate"
+)
+
+WEEKEND_OFFPEAK_RATE = st.sidebar.number_input(
+    "Weekend Off-Peak Rate (₪/kWh)",
+    min_value=0.0,
+    max_value=5.0,
+    value=WEEKEND_OFFPEAK_RATE_DEFAULT,
+    step=0.0001,
+    format="%.4f",
+    key="weekend_offpeak_rate"
+)
+
+WEEKEND_HAS_PEAK_RATE = st.sidebar.checkbox(
+    "Weekend has peak rate", 
+    value=False,
+    key="weekend_peak_checkbox"
+)
+
+
 
 if not WEEKEND_HAS_PEAK_RATE:
     daily_summary_df.loc[is_weekend_or_holiday, 'plotted_kwh_off_peak'] += daily_summary_df.loc[is_weekend_or_holiday, 'plotted_kwh_peak']
